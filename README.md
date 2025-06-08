@@ -1,6 +1,16 @@
 # UniGame.Context
 
-A comprehensive context management system for Unity, providing powerful data flow, dependency injection, scene-based context handling with reactive programming support, and advanced service management.
+## 📦 Installation
+
+To install the UniGame.Context package via git, add the following dependency to your Unity project's `Packages/manifest.json` file:
+
+```json
+{
+  "dependencies": {
+    "com.unigame.contextdata" : "https://github.com/UnioGame/unigame.context.git",
+  }
+}
+```
 
 ## 📋 Table of Contents
 
@@ -22,42 +32,14 @@ A comprehensive context management system for Unity, providing powerful data flo
 ## 🚀 Features
 
 ### Core Features
-- ✅ **Dependency Injection Container** - Type-safe data management
+
 - ✅ **Scene-based Context System** - Automatic scene lifecycle management
-- ✅ **Reactive Programming** - Observable data streams with UniRx
-- ✅ **Serializable Context Assets** - Designer-friendly ScriptableObject approach
-- ✅ **Context Connections** - Merge and share data between contexts
 - ✅ **Addressable Integration** - Load context data from addressables
 - ✅ **Auto Lifecycle Management** - Automatic cleanup and disposal
-
-### Advanced Features
 - ✅ **Async Data Sources** - Asynchronous context data loading with timeout support
-- ✅ **Service Management System** - Shared service instances with lifecycle control
-- ✅ **Entity System** - Unique ID-based entity management
 - ✅ **Context Broadcasting** - Message passing between contexts
-- ✅ **Type Data Container** - Efficient type-based storage
-- ✅ **Async Operations** - UniTask integration for async workflows
 - ✅ **Global Context** - Static context access for global data sharing
-- ✅ **Performance Profiling** - Built-in profiling for context operations
-- ✅ **Editor Extensions** - Context dependency generation tools
 
-## 📦 Installation
-
-The module is part of UniGame.CoreModules and automatically included in the project.
-
-### Dependencies
-```json
-{
-  "com.neuecc.unirx": "7.1.2",
-  "com.neuecc.unitask": "2.2.5",
-  "com.unigame.unicore": "2022.0.0",
-  "com.unigame.rx": "2022.0.0",
-  "com.unity.addressables": "2.6.0",
-  "com.unity.textmeshpro": "2.1.1",
-  "com.unigame.addressablestools": "2022.0.0",
-  "com.unigame.uitoolkit": "2022.0.0"
-}
-```
 
 ## ⚡ Quick Start
 
