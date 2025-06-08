@@ -3,7 +3,7 @@ using UniModules.UniGame.Context.SerializableContext.Runtime.Abstract;
 
 namespace UniModules.UniGame.SerializableContext.Runtime.Abstract
 {
-    using global::UniGame.Core.Runtime.Rx;
+    using global::UniGame.Runtime.Rx;
     using global::UniGame.Context.Runtime;
     using global::UniGame.Core.Runtime;
 

@@ -1,7 +1,6 @@
 ﻿namespace UniGame.Context.Runtime
 {
     using System;
-    using Core.Runtime.ScriptableObjects;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using Object = UnityEngine.Object;
@@ -12,7 +11,7 @@
     
     [Serializable]
     public class AssetReferenceDataSource<TAsset> : AssetReferenceScriptableObject<TAsset,IAsyncDataSource> 
-        where TAsset : LifetimeScriptableObject
+        where TAsset : ScriptableObject
     {
         public AssetReferenceDataSource(string guid) : base(guid) {}
         

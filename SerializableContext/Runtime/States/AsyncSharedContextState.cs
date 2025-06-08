@@ -5,7 +5,7 @@
     using Abstract;
     using global::UniGame.Core.Runtime;
     using Cysharp.Threading.Tasks;
-    using UniCore.Runtime.DataFlow;
+    using global::UniGame.Runtime.DataFlow;
 
     [Serializable]
     public abstract class AsyncSharedContextState<TValue> : IAsyncContextState<TValue>

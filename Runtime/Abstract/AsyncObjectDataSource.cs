@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace UniModules.UniGame.Context.Runtime.Context
+namespace UniGame.Context.Runtime
 {
     using global::UniGame.Core.Runtime;
     using Cysharp.Threading.Tasks;

@@ -14,8 +14,9 @@
         
         public sealed override async UniTask<IContext> RegisterAsync(IContext context)
         {
-            var atlases = await UniTask.WhenAll(Atlases.Select(x => x.LoadAssetTaskAsync(LifeTime)))
-                .AttachExternalCancellation(LifeTime.Token);
+            var lifeTime = context.LifeTime;
+            var atlases = await UniTask.WhenAll(Atlases.Select(x => x.LoadAssetTaskAsync(lifeTime)))
+                .AttachExternalCancellation(lifeTime.Token);
             context.Publish(atlases);
             return context;
         }

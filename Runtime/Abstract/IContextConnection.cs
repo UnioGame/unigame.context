@@ -1,14 +1,12 @@
-﻿namespace UniModules.UniGame.Context.Runtime.Connections
+﻿namespace UniGame.Context.Runtime
 {
     using global::UniGame.Core.Runtime;
-    using UniRx;
+     
 
     public interface IContextConnection : 
         IConnection<IContext>,
         IDisposableContext
     {
-        IReadOnlyReactiveProperty<bool> IsEmpty { get; }
-
         void Disconnect(IContext connection);
     }
 }

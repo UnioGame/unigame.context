@@ -2,7 +2,7 @@
 {
     using System;
     using Abstract;
-    using Core.Runtime.AsyncOperations;
+    using global::UniGame.Rx.Runtime;
     using global::UniGame.Core.Runtime;
 
     [Serializable]

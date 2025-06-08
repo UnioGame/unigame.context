@@ -1,10 +1,8 @@
-﻿using UniCore.Runtime.ProfilerTools;
-
-namespace UniGame.Context.Runtime.DataSources
+﻿namespace UniGame.Context.Runtime.DataSources
 {
+    using UniCore.Runtime.ProfilerTools;
     using Core.Runtime.Extension;
     using Core.Runtime;
-    using Core.Runtime.ScriptableObjects;
     using Runtime;
     using AddressableTools.Runtime;
     using System;
@@ -21,12 +19,11 @@ namespace UniGame.Context.Runtime.DataSources
 #endif
     
 #if UNITY_EDITOR
-    using UniModules.Editor;
     using UnityEditor;
 #endif
     
     [CreateAssetMenu(menuName = "UniGame/Sources/AddressableAsyncSources", fileName = nameof(AsyncDataSources))]
-    public class AsyncDataSources : LifetimeScriptableObject, IAsyncDataSource
+    public class AsyncDataSources : ScriptableObject, IAsyncDataSource
     {
         #region inspector
 
@@ -123,20 +120,11 @@ namespace UniGame.Context.Runtime.DataSources
 
             GameLog.Log($"SOURCE: RegisterContexts {sourceName} {target.GetType().Name} LIFETIME CONTEXT");
 
+            var lifeTime = target.LifeTime;
             var sourceAsset = source as Object;
             var sourceAssetName = sourceAsset == null
                 ? source.GetType().Namespace
                 : sourceAsset.name;
-
-            switch (source)
-            {
-                case null:
-                    GameLog.LogError($"Empty Data source found {sourceName} GUID {sourceAssetName}");
-                    return false;
-                case LifetimeScriptableObject lifetimeScriptableObject:
-                    lifetimeScriptableObject.AddTo(LifeTime);
-                    break;
-            }
 
             var cancellationTokenSource = new CancellationTokenSource();
             
@@ -154,7 +142,7 @@ namespace UniGame.Context.Runtime.DataSources
             }
 
             await source.RegisterAsync(target)
-                .AttachExternalCancellation(LifeTime.Token);
+                .AttachExternalCancellation(lifeTime.Token);
 
 #if DEBUG
             var elapsed = timer.ElapsedMilliseconds;

@@ -3,6 +3,7 @@
     using System;
     using global::UniGame.Core.Runtime;
     using Cysharp.Threading.Tasks;
+    using global::UniGame.Runtime.DataFlow;
 
     [Serializable]
     public abstract class AsyncStateAsset<TData,TValue> : 
@@ -14,14 +15,21 @@
         IAsyncRollback<TData>  
     {
         private AsyncStateProxyValue<TData, TValue> _asyncStateProxyValue;
-        
+        private LifeTime _lifeTime = new();
         
         public bool IsActive => _asyncStateProxyValue.IsActive;
 
+        public ILifeTime LifeTime => _lifeTime;
         
         #region public methods
 
-        public sealed override async UniTask<TValue> ExecuteAsync(TData value) => await _asyncStateProxyValue.ExecuteAsync(value);
+        public sealed override async UniTask<TValue> ExecuteAsync(TData value)
+        {
+            _lifeTime ??= new LifeTime();
+            _asyncStateProxyValue ??= new AsyncStateProxyValue<TData, TValue>(this,this,this,this);
+            var result = await _asyncStateProxyValue.ExecuteAsync(value);
+            return result;
+        }
 
         public async UniTask ExitAsync() => await _asyncStateProxyValue.ExitAsync();
 
@@ -35,16 +43,6 @@
 
         #endregion
 
-        protected override void OnActivate()
-        {
-            base.OnActivate();
-            _asyncStateProxyValue?.ExitAsync();
-            
-            LifeTime.AddCleanUpAction(() => _asyncStateProxyValue.ExitAsync());
-            _asyncStateProxyValue = 
-                _asyncStateProxyValue ?? 
-                new AsyncStateProxyValue<TData, TValue>(this,this,this,this);
-        }
-
     }
+
 }

@@ -2,7 +2,7 @@
 using UniGame.Context.Runtime;
 using UniGame.Core.Runtime;
 
-namespace UniGame.Rx.Runtime
+namespace UniGame.Runtime.Rx.Runtime
 {
     public interface IAsyncSharedSource
     {

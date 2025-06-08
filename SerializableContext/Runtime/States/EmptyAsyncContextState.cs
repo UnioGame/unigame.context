@@ -16,7 +16,7 @@
 
         public UniTask ExitAsync() => UniTask.CompletedTask;
 
-        public ILifeTime LifeTime => UniCore.Runtime.DataFlow.LifeTime.TerminatedLifetime;
+        public ILifeTime LifeTime => global::UniGame.Runtime.DataFlow.LifeTime.TerminatedLifetime;
        
         public bool IsActive => false;
     }
