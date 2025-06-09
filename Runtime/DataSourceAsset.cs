@@ -7,9 +7,13 @@ namespace UniGame.Context.Runtime
     using System;
     using System.Threading;
     using Cysharp.Threading.Tasks;
-    using Sirenix.OdinInspector;
+    
     using UnityEngine;
 
+#if ODIN_INSPECTOR
+    using Sirenix.OdinInspector;
+#endif
+    
 #if UNITY_EDITOR
     using UnityEditor;
 #endif
