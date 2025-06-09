@@ -1,4 +1,4 @@
-﻿namespace UniModules.UniGame.Context.SerializableContext.Runtime.Abstract
+﻿namespace UniGame.Context.Runtime
 {
     using System;
     using global::UniGame.Core.Runtime;

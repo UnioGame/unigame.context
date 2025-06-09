@@ -1,4 +1,4 @@
-﻿namespace UniModules.UniGame.Context.SerializableContext.Runtime.States
+﻿namespace UniGame.Context.Runtime.Runtime.States
 {
     using System;
     using global::UniGame.Core.Runtime;
