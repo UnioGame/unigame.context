@@ -12,13 +12,13 @@ namespace UniGame.Context.Runtime
     {
         private ReadOnlyReactiveProperty<bool> isActive;
         private IReadOnlyDictionary<Type, IValueContainerStatus> editorValues;
-        private LifeTimeDefinition lifeTime;
+        private LifeTime lifeTime;
         private int handle;
         
         public DummyReadOnlySceneContext()
         {
             editorValues = new Dictionary<Type, IValueContainerStatus>(0);
-            lifeTime = new LifeTimeDefinition();
+            lifeTime = new LifeTime();
             lifeTime.Terminate();
         }
 

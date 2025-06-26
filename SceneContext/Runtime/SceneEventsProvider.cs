@@ -6,7 +6,7 @@ namespace UniGame.Context.Runtime {
 
     public class SceneEventsProvider : ISceneEventsProvider 
     {
-        private LifeTimeDefinition                         _lifeTime       = new();
+        private LifeTime                         _lifeTime       = new();
         private Subject<Scene>                             _unloadSubject  = new();
         private Subject<(Scene scene, LoadSceneMode mode)> _loadingSubject = new();
         private Subject<(Scene previous, Scene active)>    _activeSubject  = new();

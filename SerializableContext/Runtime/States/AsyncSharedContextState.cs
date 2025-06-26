@@ -10,7 +10,7 @@
     [Serializable]
     public abstract class AsyncSharedContextState<TValue> : IAsyncContextState<TValue>
     {
-        private LifeTimeDefinition _lifeTime;
+        private LifeTime _lifeTime;
         private SemaphoreSlim      _semafore;
         private bool               _isActive;
         private UniTask<TValue>    _taskHandle;
@@ -57,7 +57,7 @@
             
         }
 
-        public ILifeTime LifeTime => _lifeTime = (_lifeTime ?? new LifeTimeDefinition());
+        public ILifeTime LifeTime => _lifeTime = (_lifeTime ?? new LifeTime());
 
         public bool IsActive => _isActive;
 

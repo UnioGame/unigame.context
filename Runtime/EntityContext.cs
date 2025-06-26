@@ -17,7 +17,7 @@ namespace UniGame.Context.Runtime
     public class EntityContext : IDisposableContext
     {
         private TypeData _data;
-        private LifeTimeDefinition _lifeTime;
+        private LifeTime _lifeTime;
         private TypeDataBrodcaster _broadcaster;
         private int _id;
 
@@ -26,7 +26,7 @@ namespace UniGame.Context.Runtime
             //context data container
             _data = new TypeData();
             //context lifetime
-            _lifeTime = new LifeTimeDefinition();
+            _lifeTime = new LifeTime();
             _broadcaster = new TypeDataBrodcaster();
             _id = Unique.GetId();
 
@@ -57,7 +57,7 @@ namespace UniGame.Context.Runtime
 
         public int Id => _id;
 
-        public ILifeTime LifeTime => _lifeTime.LifeTime;
+        public ILifeTime LifeTime => _lifeTime;
 
         public bool HasValue => _data.HasValue;
 

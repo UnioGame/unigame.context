@@ -17,14 +17,14 @@
 
 
         private readonly ISceneEventsProvider                    _eventsProvider;
-        private          LifeTimeDefinition                      _lifeTime;
+        private          LifeTime                      _lifeTime;
         private          Dictionary<int, ISceneContext>          _sceneContexts;
         private          ReactiveProperty<IReadOnlySceneContext> _activeContext;
         private          Subject<IReadOnlySceneContext>          _sceneContextChanged;
         private          EntityContext                           _context = new();
 
         public ScenesContext(ISceneEventsProvider eventsProvider) {
-            _lifeTime            = new LifeTimeDefinition();
+            _lifeTime            = new LifeTime();
             _sceneContexts       = new Dictionary<int, ISceneContext>(8);
             _eventsProvider      = eventsProvider.AddTo(_lifeTime);
             _activeContext       = new ReactiveProperty<IReadOnlySceneContext>().AddTo(_lifeTime);

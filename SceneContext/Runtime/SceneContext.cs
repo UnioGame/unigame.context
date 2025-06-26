@@ -10,7 +10,7 @@ namespace UniGame.Context.Runtime {
     [Serializable]
     public class SceneContext : ISceneContext 
     {
-        private readonly LifeTimeDefinition                   _lifeTime = new();
+        private readonly LifeTime                   _lifeTime = new();
         private readonly EntityContext                        _context  = new();
         private readonly ReactiveValue<SceneStatus> _status   = new(SceneStatus.Unload);
         private readonly ReactiveValue<bool>        _isActive = new(false);
