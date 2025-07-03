@@ -3,15 +3,14 @@
   "author": "UniGame",
   "displayName": "UniGame Context Data",
   "description": "",
-  "unity": "2019.2",
-  "version": "2025.0.4",
+  "unity": "2023.2",
+  "version": "2025.0.5",
   "keywords": [
     "context",
     "rx",
     "context"
   ],
   "dependencies": {
-    "com.unity.textmeshpro": "2.1.1",
     "com.unity.addressables": "2.6.0",
     "com.unigame.addressablestools": "https://github.com/UnioGame/unigame.addressables.git",
     "com.cysharp.unitask" : "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
