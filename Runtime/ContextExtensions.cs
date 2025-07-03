@@ -62,7 +62,7 @@ namespace UniGame.Context.Runtime
         {
             return context.
                 Receive<T>().
-                Do(x => GameLog.Log($"{typeof(T).Name} CONTEXT Get {x.GetType().Name}", Color.gold)).
+                Do(x => GameLog.Log($"{typeof(T).Name} CONTEXT Get {x.GetType().Name}", Color.yellow)).
                 Subscribe();
         }
         
@@ -70,7 +70,7 @@ namespace UniGame.Context.Runtime
         {
             return context.
                 Receive<T>().
-                Do(x => GameLog.Log($"{id} CONTEXT Get {x.GetType().Name}", Color.gold)).
+                Do(x => GameLog.Log($"{id} CONTEXT Get {x.GetType().Name}", Color.yellow)).
                 Subscribe();
         }
         
