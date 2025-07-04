@@ -1,38 +1,27 @@
 ﻿namespace UniGame.Context.Runtime
 {
-    using UniCore.Runtime.ProfilerTools;
-    using Core.Runtime.Extension;
-    using Core.Runtime;
-    using AddressableTools.Runtime;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
     using System.Threading;
+    using AddressableTools.Runtime;
+    using Core.Runtime;
+    using Core.Runtime.Extension;
     using Cysharp.Threading.Tasks;
+    using Sirenix.OdinInspector;
+    using UniCore.Runtime.ProfilerTools;
     using UnityEngine;
     using Object = UnityEngine.Object;
 
-#if ODIN_INSPECTOR
-    using Sirenix.OdinInspector;
-#endif
-
-#if UNITY_EDITOR
-    using UnityEditor;
-#endif
-
-    [CreateAssetMenu(menuName = "UniGame/Context/Async Data Sources", fileName = nameof(AsyncDataSources))]
-    public class AsyncDataSources : ScriptableObject, IAsyncDataSource
+    [Serializable]
+    public class AsyncContextSource : IAsyncDataSource
     {
         #region inspector
 
         public bool enabled = true;
 
-#if ODIN_INSPECTOR
-        [InlineEditor()] [Searchable]
-#endif
-        public List<ScriptableObject> sources = new();
-
+        public string name;
+        
         [Space]
 #if ODIN_INSPECTOR
         [LabelText("Async Sources")]
@@ -52,30 +41,15 @@
             if (enabled == false)
                 return context;
 
-            var syncSources = sources
-                .Where(x => x is IAsyncDataSource)
-                .Select(x => x.ToSharedInstance())
-                .Select(x => (x as IAsyncDataSource))
-                .Select(x => RegisterContexts(context, x));
-
             var asyncValues = asyncSources
                 .Select(x => RegisterContexts(context, x));
 
-            await UniTask.WhenAll(syncSources.Concat(asyncValues));
+            await UniTask.WhenAll(asyncValues);
 
             return context;
         }
 
 #if UNITY_EDITOR
-#if ODIN_INSPECTOR
-        [Button]
-#endif
-        public void Save()
-        {
-            EditorUtility.SetDirty(this);
-            AssetDatabase.SaveAssetIfDirty(this);
-        }
-#endif
 
         private async UniTask<bool> RegisterContexts(IContext target, AsyncSourceDescription sourceReference)
         {
@@ -167,4 +141,6 @@
             GameLog.LogError($"SOURCE: {assetSourceName} : REGISTER SOURCE TIMEOUT {assetName}");
         }
     }
+#endif
+    
 }
