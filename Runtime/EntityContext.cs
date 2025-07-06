@@ -29,8 +29,6 @@ namespace UniGame.Context.Runtime
             _lifeTime = new LifeTime();
             _broadcaster = new TypeDataBrodcaster();
             _id = Unique.GetId();
-
-            Release();
         }
 
         #region connection api

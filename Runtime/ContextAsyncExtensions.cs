@@ -6,6 +6,8 @@ namespace UniGame.Context.Runtime
 {
     using Cysharp.Threading.Tasks;
     using R3;
+    using UniCore.Runtime.ProfilerTools;
+    using UniGame.Runtime.Rx.Extensions;
     using UnityEngine;
 
     public static class ContextAsyncExtensions
@@ -15,7 +17,8 @@ namespace UniGame.Context.Runtime
             return await context.ReceiveFirstAsync<TValue>(context.LifeTime);
         }
 
-        public static async UniTask<TValue> ReceiveFirstAsync<TValue>(this IReadOnlyContext context,
+        public static async UniTask<TValue> ReceiveFirstAsync<TValue>(
+            this IReadOnlyContext context,
             ILifeTime lifeTime)
         {
             if (context == null) return default;
@@ -23,9 +26,12 @@ namespace UniGame.Context.Runtime
             if (context.Contains<TValue>())
                 return context.Get<TValue>();
 
-            return await context
+            var result = await context
                 .Receive<TValue>()
+                .FirstNotNull()
                 .FirstAsync(cancellationToken:lifeTime.Token);
+            
+            return result;
         }
 
         public static async UniTask<TValue> ReceiveFirstAsync<TValue>(this IReadOnlyContext context, IObservable<TValue> observable)
