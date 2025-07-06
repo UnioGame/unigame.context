@@ -49,8 +49,6 @@
             return context;
         }
 
-#if UNITY_EDITOR
-
         private async UniTask<bool> RegisterContexts(IContext target, AsyncSourceDescription sourceReference)
         {
             if (sourceReference.enabled == false)
@@ -123,7 +121,7 @@
             cancellationTokenSource.Cancel();
             cancellationTokenSource.Dispose();
 
-            GameLog.LogRuntime($"SOURCE: {sourceName} : REGISTER SOURCE {sourceAssetName}", Color.green);
+            GameLog.Log($"SOURCE: {sourceName} : REGISTER SOURCE {sourceAssetName}", Color.green);
 
             return true;
         }
@@ -140,7 +138,6 @@
 
             GameLog.LogError($"SOURCE: {assetSourceName} : REGISTER SOURCE TIMEOUT {assetName}");
         }
+        
     }
-#endif
-    
 }
