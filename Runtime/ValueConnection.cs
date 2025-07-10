@@ -1,17 +1,16 @@
-﻿
+﻿using UniGame.Core.Runtime;
+using UniGame.Runtime.Common;
+using UniGame.Runtime.DataFlow;
+using UniGame.Runtime.ObjectPool;
+using UniGame.Core.Runtime.ObjectPool;
+
 namespace UniGame.Context.Runtime
 {
     using System;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
-    using global::UniGame.Core.Runtime;
-    using global::UniGame.Runtime.Common;
-    using global::UniGame.Runtime.DataFlow;
-    using global::UniGame.Runtime.ObjectPool;
-    using global::UniGame.Core.Runtime.ObjectPool;
     using R3;
-
-
+    
     public class ValueConnection<TData> : 
         ILifeTimeContext,
         IPoolable
@@ -27,7 +26,7 @@ namespace UniGame.Context.Runtime
         
         public virtual void Release()
         {
-            _lifeTime.Release();
+            _lifeTime.Restart();
             _registeredItems.Clear();
             OnRelease();
         }

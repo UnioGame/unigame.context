@@ -73,12 +73,15 @@ namespace UniGame.Context.Runtime
         
         public void Release()
         {
-            _lifeTime.Release();
+            _lifeTime.Restart();
             _lifeTime.AddCleanUpAction(_data.Release);
             _lifeTime.AddCleanUpAction(_broadcaster.Release);
         }
 
-        public virtual void Dispose() => Release();
+        public virtual void Dispose()
+        {
+            Release();
+        }
 
         #region rx
 

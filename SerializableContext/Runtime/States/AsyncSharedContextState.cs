@@ -52,9 +52,7 @@
             await OnExit();
             
             _isActive = false;
-
-            _lifeTime?.Release();
-            
+            _lifeTime?.Restart();
         }
 
         public ILifeTime LifeTime => _lifeTime = (_lifeTime ?? new LifeTime());
