@@ -28,8 +28,6 @@ namespace UniGame.Context.Runtime
 
         public bool isSharedSystem = true;
 
-        public bool ownDataLifeTime = true;
-
         #endregion
 
         private static TApi _sharedValue;
@@ -40,9 +38,10 @@ namespace UniGame.Context.Runtime
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void ResetSource()
         {
-            if(_sharedValue is IDisposable disposable)
-                disposable.Dispose();
+            var value = _sharedValue;
             _sharedValue = default;
+            if(value is IDisposable disposable)
+                disposable.Dispose();
         }
         
 #endif
@@ -94,9 +93,8 @@ namespace UniGame.Context.Runtime
                     {
                         _sharedValue = await CreateInternalAsync(context)
                             .AttachExternalCancellation(lifeTime.Token);
-                    
-                        if (_sharedValue is IDisposable disposable && ownDataLifeTime)
-                            disposable.AddTo(lifeTime);
+
+                        lifeTime.AddCleanUpAction(static () => ResetStatus());
                     }
                 }
                 finally
@@ -112,7 +110,7 @@ namespace UniGame.Context.Runtime
             var value = await CreateInternalAsync(context)
                 .AttachExternalCancellation(lifeTime.Token);
 
-            if (value is IDisposable disposableValue && ownDataLifeTime)
+            if (value is IDisposable disposableValue)
                 disposableValue.AddTo(lifeTime);
 
             return value;
