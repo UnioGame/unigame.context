@@ -1,7 +1,10 @@
 ﻿namespace UniGame.Context.Runtime
 {
     using System;
+
+#if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+#endif
 
     [Serializable]
     public class AsyncSourceDescription

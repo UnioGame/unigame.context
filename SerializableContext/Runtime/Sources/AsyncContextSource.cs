@@ -8,11 +8,15 @@
     using Core.Runtime;
     using Core.Runtime.Extension;
     using Cysharp.Threading.Tasks;
-    using Sirenix.OdinInspector;
     using UniCore.Runtime.ProfilerTools;
     using UnityEngine;
     using Object = UnityEngine.Object;
 
+#if ODIN_INSPECTOR
+    using Sirenix.OdinInspector;
+#endif
+    
+    
     [Serializable]
     public class AsyncContextSource : IAsyncDataSource
     {
