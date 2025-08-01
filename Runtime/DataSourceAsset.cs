@@ -35,13 +35,17 @@ namespace UniGame.Context.Runtime
         private static TApi _sharedValue;
         private SemaphoreSlim _semaphoreSlim;
 
+#if UNITY_EDITOR
+        
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        public static void Reset()
+        public static void ResetSource()
         {
             if(_sharedValue is IDisposable disposable)
                 disposable.Dispose();
             _sharedValue = default;
         }
+        
+#endif
         
         #region public methods
 
