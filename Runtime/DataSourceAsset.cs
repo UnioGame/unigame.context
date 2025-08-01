@@ -32,8 +32,6 @@ namespace UniGame.Context.Runtime
 
         private static TApi _sharedValue;
         private SemaphoreSlim _semaphoreSlim;
-
-#if UNITY_EDITOR
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void ResetSource()
@@ -43,8 +41,6 @@ namespace UniGame.Context.Runtime
             if(value is IDisposable disposable)
                 disposable.Dispose();
         }
-        
-#endif
         
         #region public methods
 
@@ -94,7 +90,7 @@ namespace UniGame.Context.Runtime
                         _sharedValue = await CreateInternalAsync(context)
                             .AttachExternalCancellation(lifeTime.Token);
 
-                        lifeTime.AddCleanUpAction(static () => ResetStatus());
+                        lifeTime.AddCleanUpAction(static () => ResetSource());
                     }
                 }
                 finally
