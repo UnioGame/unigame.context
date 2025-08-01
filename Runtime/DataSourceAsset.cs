@@ -9,6 +9,7 @@ namespace UniGame.Context.Runtime
     using Cysharp.Threading.Tasks;
     
     using UnityEngine;
+    using UnityEngine.Scripting;
 
 #if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
@@ -18,6 +19,7 @@ namespace UniGame.Context.Runtime
     using UnityEditor;
 #endif
     
+    [Preserve]
     public abstract class DataSourceAsset<TApi> :
         ScriptableObject,
         IAsyncDataSource
@@ -30,17 +32,8 @@ namespace UniGame.Context.Runtime
 
         #endregion
 
-        private static TApi _sharedValue;
+        private TApi _sharedValue;
         private SemaphoreSlim _semaphoreSlim;
-        
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        public static void ResetSource()
-        {
-            var value = _sharedValue;
-            _sharedValue = default;
-            if(value is IDisposable disposable)
-                disposable.Dispose();
-        }
         
         #region public methods
 
@@ -64,6 +57,14 @@ namespace UniGame.Context.Runtime
 
             context.Publish(result);
             return context;
+        }
+        
+        public void ResetSource()
+        {
+            var value = _sharedValue;
+            _sharedValue = default;
+            if(value is IDisposable disposable)
+                disposable.Dispose();
         }
 
         /// <summary>
@@ -90,7 +91,7 @@ namespace UniGame.Context.Runtime
                         _sharedValue = await CreateInternalAsync(context)
                             .AttachExternalCancellation(lifeTime.Token);
 
-                        lifeTime.AddCleanUpAction(static () => ResetSource());
+                        lifeTime.AddCleanUpAction(ResetSource);
                     }
                 }
                 finally
@@ -116,6 +117,7 @@ namespace UniGame.Context.Runtime
 
         private void OnDestroy()
         {
+            ResetSource();
             _semaphoreSlim?.Dispose();
             _semaphoreSlim = null;
         }
