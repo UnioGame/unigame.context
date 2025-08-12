@@ -45,14 +45,14 @@ namespace UniGame.Context.Runtime
 
 #if UNITY_EDITOR || GAME_LOGS_ENABLED || DEBUG
             var profileId = ProfilerUtils.BeginWatch($"Service_{typeof(TApi).Name}");
-            GameLog.Log($"GameService Profiler Init : {typeof(TApi).Name} | {DateTime.Now}");
+            GameLog.Log($"Game Source Init : {typeof(TApi).Name} | {DateTime.Now}");
 #endif
 
             var result = await CreateAsync(context).AttachExternalCancellation(lifeTime.Token);
 
 #if UNITY_EDITOR || GAME_LOGS_ENABLED || DEBUG
             var watchResult = ProfilerUtils.GetWatchData(profileId);
-            GameLog.Log($"GameService Profiler Create : {typeof(TApi).Name} | Take {watchResult.watchMs} | {DateTime.Now}");
+            GameLog.Log($"Game Source Done : {typeof(TApi).Name} | Take {watchResult.watchMs} | {DateTime.Now}",Color.green);
 #endif
 
             context.Publish(result);
