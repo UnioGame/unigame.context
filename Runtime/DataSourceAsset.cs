@@ -20,14 +20,74 @@ namespace UniGame.Context.Runtime
 #endif
     
     [Preserve]
-    public abstract class DataSourceAsset<TApi> :
+    public abstract class DataSourceAsset :
         ScriptableObject,
         IAsyncDataSource
     {
         #region inspector
 
         public bool enabled = true;
+        
+        #endregion
 
+        private SemaphoreSlim _semaphoreSlim;
+
+        #region public methods
+
+        public async UniTask<IContext> RegisterAsync(IContext context)
+        {
+            var lifeTime = context.LifeTime;
+
+            if (!enabled) return context;
+
+#if UNITY_EDITOR || GAME_LOGS_ENABLED || DEBUG
+            var profileId = ProfilerUtils.BeginWatch($"Service_{name}");
+            GameLog.Log($"Game Service Init : {name} | {DateTime.Now}");
+#endif
+
+            await OnRegisterAsync(context)
+                .AttachExternalCancellation(lifeTime.Token);
+
+#if UNITY_EDITOR || GAME_LOGS_ENABLED || DEBUG
+            var watchResult = ProfilerUtils.GetWatchData(profileId);
+            GameLog.Log($"Game Source Done : {name} | Take {watchResult.watchMs} | {DateTime.Now}",
+                Color.green);
+#endif
+
+            return context;
+        }
+
+
+        public virtual void ResetSource() {}
+
+        #endregion
+
+        protected abstract UniTask<IContext> OnRegisterAsync(IContext context);
+
+        private void OnDestroy()
+        {
+            ResetSource();
+            _semaphoreSlim?.Dispose();
+            _semaphoreSlim = null;
+        }
+        
+#if ODIN_INSPECTOR
+        [Button]
+#endif
+        public void Save()
+        {
+#if UNITY_EDITOR
+            EditorUtility.SetDirty(this);
+#endif
+        }
+    }
+    
+    
+    [Preserve]
+    public abstract class DataSourceAsset<TApi> : DataSourceAsset
+    {
+        #region inspector
+        
         public bool isSharedSystem = true;
 
         #endregion
@@ -37,29 +97,7 @@ namespace UniGame.Context.Runtime
         
         #region public methods
 
-        public async UniTask<IContext> RegisterAsync(IContext context)
-        {
-            var lifeTime = context.LifeTime;
-            
-            if (!enabled) return context;
-
-#if UNITY_EDITOR || GAME_LOGS_ENABLED || DEBUG
-            var profileId = ProfilerUtils.BeginWatch($"Service_{typeof(TApi).Name}");
-            GameLog.Log($"Game Source Init : {typeof(TApi).Name} | {DateTime.Now}");
-#endif
-
-            var result = await CreateAsync(context).AttachExternalCancellation(lifeTime.Token);
-
-#if UNITY_EDITOR || GAME_LOGS_ENABLED || DEBUG
-            var watchResult = ProfilerUtils.GetWatchData(profileId);
-            GameLog.Log($"Game Source Done : {typeof(TApi).Name} | Take {watchResult.watchMs} | {DateTime.Now}",Color.green);
-#endif
-
-            context.Publish(result);
-            return context;
-        }
-        
-        public void ResetSource()
+        public override void ResetSource()
         {
             var value = _sharedValue;
             _sharedValue = default;
@@ -67,6 +105,16 @@ namespace UniGame.Context.Runtime
                 disposable.Dispose();
         }
 
+        
+        protected override async UniTask<IContext> OnRegisterAsync(IContext context)
+        {
+            var lifeTime = context.LifeTime;
+            var result = await CreateAsync(context).AttachExternalCancellation(lifeTime.Token);
+            context.Publish(result);
+            return context;
+        }
+
+        
         /// <summary>
         /// service factory
         /// </summary>
@@ -127,11 +175,14 @@ namespace UniGame.Context.Runtime
 #if ODIN_INSPECTOR
         [Button]
 #endif
-        public void Save()
+        public void SaveAsset()
         {
 #if UNITY_EDITOR
             EditorUtility.SetDirty(this);
 #endif
         }
     }
+
+
+
 }
