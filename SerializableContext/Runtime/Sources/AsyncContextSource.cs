@@ -8,12 +8,19 @@
     using Core.Runtime;
     using Core.Runtime.Extension;
     using Cysharp.Threading.Tasks;
+    using Sirenix.Utilities.Editor;
     using UniCore.Runtime.ProfilerTools;
+    
     using UnityEngine;
     using Object = UnityEngine.Object;
 
 #if ODIN_INSPECTOR
     using Sirenix.OdinInspector;
+#endif
+
+#if UNITY_EDITOR
+    using UniModules.Editor;
+    using UnityEditor;
 #endif
     
     
@@ -30,7 +37,7 @@
 #if ODIN_INSPECTOR
         [LabelText("Async Sources")]
         [Searchable]
-        [ListDrawerSettings(ListElementLabelName = "Name")]
+        [ListDrawerSettings(ListElementLabelName = "Name",OnEndListElementGUI = nameof(EndDrawListElement))]
 #endif
         public List<AsyncSourceDescription> asyncSources = new();
 
@@ -141,6 +148,20 @@
                 .AttachExternalCancellation(cancellationToken);
 
             GameLog.LogError($"SOURCE: {assetSourceName} : REGISTER SOURCE TIMEOUT {assetName}");
+        }
+        
+        private void EndDrawListElement(int index)
+        {
+#if UNITY_EDITOR
+            var source = asyncSources[index];
+            var sourceAsset = source.source.editorAsset;
+            if (sourceAsset == null) return;
+            
+            if (!SirenixEditorGUI.Button("open", ButtonSizes.Medium)) return;
+            
+            var type = sourceAsset.GetType();
+            type.OpenEditorScript();
+#endif
         }
         
     }
