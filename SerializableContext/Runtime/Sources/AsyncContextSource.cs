@@ -13,11 +13,13 @@
     using Object = UnityEngine.Object;
 
 #if ODIN_INSPECTOR
-    using Sirenix.Utilities.Editor;
     using Sirenix.OdinInspector;
 #endif
-
+    
 #if UNITY_EDITOR
+#if ODIN_INSPECTOR
+    using Sirenix.Utilities.Editor;
+#endif
     using UniModules.Editor;
     using UnityEditor;
 #endif
