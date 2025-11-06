@@ -45,6 +45,7 @@
         public bool useTimeout = true;
 
         public float timeOutMs = 60000;
+        public float editorTimeOutMs = 10000;
 
         #endregion
 
@@ -113,7 +114,11 @@
             timer.Restart();
 #endif
 
-            if (useTimeout && timeOutMs > 0)
+            var timeOut = Application.isEditor
+                ? editorTimeOutMs
+                : timeOutMs;
+            
+            if (useTimeout && timeOut > 0)
             {
                 HandleTimeout(sourceAssetName, cancellationTokenSource.Token)
                     .AttachExternalCancellation(cancellationTokenSource.Token)
@@ -140,12 +145,15 @@
 
         private async UniTask HandleTimeout(string assetName, CancellationToken cancellationToken)
         {
-            if (!useTimeout || timeOutMs <= 0)
-                return;
+            var timeOut = Application.isEditor
+                ? editorTimeOutMs
+                : timeOutMs;
+            
+            if (!useTimeout || timeOut <= 0) return;
 
             var assetSourceName = name;
 
-            await UniTask.Delay(TimeSpan.FromMilliseconds(timeOutMs), cancellationToken: cancellationToken)
+            await UniTask.Delay(TimeSpan.FromMilliseconds(timeOut), cancellationToken: cancellationToken)
                 .AttachExternalCancellation(cancellationToken);
 
             GameLog.LogError($"SOURCE: {assetSourceName} : REGISTER SOURCE TIMEOUT {assetName}");
