@@ -61,7 +61,7 @@
             var sourceName = name;
             var sourceValue = sourceReference.source;
 
-            GameLog.Log($"SOURCE: RegisterContexts {sourceName} {target.GetType().Name} LIFETIME CONTEXT");
+            GameLog.Log($"SOURCE: RegisterContexts {sourceName} {target.GetType().Name} LIFETIME CONTEXT. Source name: {sourceReference.Name}");
 
             var source = await sourceValue
                 .LoadAssetTaskAsync(target.LifeTime)
