@@ -16,6 +16,18 @@ namespace UniGame.Context.Runtime
         {
             return await context.ReceiveFirstAsync<TValue>(context.LifeTime);
         }
+        
+        public static async UniTask<TValue> GetAsync<TValue>(this IReadOnlyContext context)
+        {
+            return await context.ReceiveFirstAsync<TValue>(context.LifeTime);
+        }
+
+        public static async UniTask<TValue> GetAsync<TValue>(
+            this IReadOnlyContext context,
+            ILifeTime lifeTime)
+        {
+            return await context.ReceiveFirstAsync<TValue>(lifeTime);
+        }
 
         public static async UniTask<TValue> ReceiveFirstAsync<TValue>(
             this IReadOnlyContext context,
