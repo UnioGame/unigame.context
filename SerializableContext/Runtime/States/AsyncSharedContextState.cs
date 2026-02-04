@@ -25,10 +25,7 @@
                 if (!_isActive) {
                     
                     _isActive = true;
-                    var contextLifetime = value.
-                        LifeTime.
-                        Compose(LifeTime);
-                    
+                    var contextLifetime = LifeTime;
                     _taskHandle = OnExecute(value, contextLifetime);
                 }
             }
