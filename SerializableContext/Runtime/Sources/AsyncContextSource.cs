@@ -70,7 +70,7 @@
             var sourceName = name;
             var sourceValue = sourceReference.source;
 
-            GameLog.Log($"SOURCE: RegisterContexts {sourceName} {target.GetType().Name} LIFETIME CONTEXT. Source name: {sourceReference.Name}");
+            GameLog.Log($"GAME CONTEXT [{name}]: RegisterContexts {sourceName} {target.GetType().Name} Source name: {sourceReference.Name}");
 
             var source = await sourceValue
                 .LoadAssetTaskAsync(target.LifeTime)
@@ -99,7 +99,7 @@
         {
             var sourceName = name;
 
-            GameLog.Log($"SOURCE: RegisterContexts {sourceName} {target.GetType().Name} LIFETIME CONTEXT");
+            GameLog.Log($"GAME CONTEXT [{name}]: RegisterContexts {sourceName} {target.GetType().Name} LIFETIME CONTEXT");
 
             var lifeTime = target.LifeTime;
             var sourceAsset = source as Object;
@@ -109,7 +109,7 @@
 
             var cancellationTokenSource = new CancellationTokenSource();
 
-#if DEBUG
+#if GAME_DEBUG || UNITY_EDITOR
             var timer = Stopwatch.StartNew();
             timer.Restart();
 #endif
@@ -121,7 +121,6 @@
             if (useTimeout && timeOut > 0)
             {
                 HandleTimeout(sourceAssetName, cancellationTokenSource.Token)
-                    .AttachExternalCancellation(cancellationTokenSource.Token)
                     .SuppressCancellationThrow()
                     .Forget();
             }
@@ -129,34 +128,33 @@
             await source.RegisterAsync(target)
                 .AttachExternalCancellation(lifeTime.Token);
 
-#if DEBUG
+#if GAME_DEBUG || UNITY_EDITOR
             var elapsed = timer.ElapsedMilliseconds;
             timer.Stop();
-            GameLog.LogRuntime($"SOURCE: LOAD TIME {sourceAssetName} = {elapsed} ms");
+            GameLog.LogRuntime($"GAME CONTEXT [{name}]: LOAD TIME {sourceAssetName} = {elapsed} ms");
 #endif
 
             cancellationTokenSource.Cancel();
             cancellationTokenSource.Dispose();
 
-            GameLog.Log($"SOURCE: {sourceName} : REGISTER SOURCE {sourceAssetName}", Color.green);
+            GameLog.Log($"GAME CONTEXT [{name}]: {sourceName} : REGISTER SOURCE {sourceAssetName}", Color.green);
 
             return true;
         }
 
         private async UniTask HandleTimeout(string assetName, CancellationToken cancellationToken)
         {
+            var assetSourceName = name;
+            
             var timeOut = Application.isEditor
                 ? editorTimeOutMs
                 : timeOutMs;
             
             if (!useTimeout || timeOut <= 0) return;
+            
+            await UniTask.Delay(TimeSpan.FromMilliseconds(timeOut), cancellationToken: cancellationToken);
 
-            var assetSourceName = name;
-
-            await UniTask.Delay(TimeSpan.FromMilliseconds(timeOut), cancellationToken: cancellationToken)
-                .AttachExternalCancellation(cancellationToken);
-
-            GameLog.LogError($"SOURCE: {assetSourceName} : REGISTER SOURCE TIMEOUT {assetName}");
+            GameLog.LogError($"GAME CONTEXT [{name}]: {assetSourceName} : TIMEOUT {assetName}");
         }
         
         private void EndDrawListElement(int index)
