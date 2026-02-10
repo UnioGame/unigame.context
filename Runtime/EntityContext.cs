@@ -12,6 +12,7 @@ namespace UniGame.Context.Runtime
     using UniGame.Runtime.Common;
     using UniGame.Runtime.DataFlow;
     using UniGame.DataFlow;
+    using UnityEngine;
 
     [Serializable]
     public class EntityContext : IDisposableContext
@@ -141,6 +142,27 @@ namespace UniGame.Context.Runtime
     public static class GameContext
     {
         public static IContext Context;
+
+        public static T Get<T>()
+        {
+            if (Context == null)
+            {
+                Debug.LogError($" Context is null. Can't get value of type {typeof(T)}");
+                return default;
+            }
+
+            return Context.Get<T>();
+        }
+
+        public static async UniTask<T> GetAsync<T>(CancellationToken token = default)
+        {
+            if (Context != null && Context.Contains<T>())
+                return Context.Get<T>();
+
+            await UniTask.WaitWhile(() => Context == null, cancellationToken: token);
+            
+            return await Context.GetAsync<T>();
+        }
 
         public static async UniTask<IContext> GetContextAsync(CancellationToken token = default)
         {
