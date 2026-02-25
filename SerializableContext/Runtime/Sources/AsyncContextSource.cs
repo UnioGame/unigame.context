@@ -163,8 +163,10 @@
             var source = asyncSources[index];
             var sourceAsset = source.source.editorAsset;
             if (sourceAsset == null) return;
-            
+
+#if ODIN_INSPECTOR
             if (!SirenixEditorGUI.Button("open", ButtonSizes.Medium)) return;
+#endif
             
             var type = sourceAsset.GetType();
             type.OpenEditorScript();
