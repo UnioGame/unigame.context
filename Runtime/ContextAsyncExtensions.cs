@@ -4,6 +4,7 @@ using UniGame.Core.Runtime;
 
 namespace UniGame.Context.Runtime
 {
+    using System.Threading;
     using Cysharp.Threading.Tasks;
     using R3;
     using UniCore.Runtime.ProfilerTools;
@@ -17,21 +18,19 @@ namespace UniGame.Context.Runtime
             return await context.ReceiveFirstAsync<TValue>(context.LifeTime);
         }
         
-        public static async UniTask<TValue> GetAsync<TValue>(this IReadOnlyContext context)
+        public static async UniTask<TValue> GetAsync<TValue>(this IReadOnlyContext context, CancellationToken cancellationToken = default)
         {
-            return await context.ReceiveFirstAsync<TValue>(context.LifeTime);
+            return await context.ReceiveFirstAsync<TValue>(cancellationToken);
         }
-
+        
         public static async UniTask<TValue> GetAsync<TValue>(
             this IReadOnlyContext context,
             ILifeTime lifeTime)
         {
-            return await context.ReceiveFirstAsync<TValue>(lifeTime);
+            return await context.ReceiveFirstAsync<TValue>(lifeTime.Token);
         }
 
-        public static async UniTask<TValue> ReceiveFirstAsync<TValue>(
-            this IReadOnlyContext context,
-            ILifeTime lifeTime)
+        public static async UniTask<TValue> ReceiveFirstAsync<TValue>(this IReadOnlyContext context, CancellationToken cancellationToken)
         {
             if (context == null) return default;
             
@@ -41,9 +40,16 @@ namespace UniGame.Context.Runtime
             var result = await context
                 .Receive<TValue>()
                 .FirstNotNull()
-                .FirstAsync(cancellationToken:lifeTime.Token);
+                .FirstAsync(cancellationToken:cancellationToken);
             
             return result;
+        }
+
+        public static async UniTask<TValue> ReceiveFirstAsync<TValue>(
+            this IReadOnlyContext context,
+            ILifeTime lifeTime)
+        {
+            return await context.ReceiveFirstAsync<TValue>(lifeTime.Token);
         }
 
         public static async UniTask<TValue> ReceiveFirstAsync<TValue>(this IReadOnlyContext context, IObservable<TValue> observable)
