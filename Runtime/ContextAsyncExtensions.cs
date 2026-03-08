@@ -18,16 +18,29 @@ namespace UniGame.Context.Runtime
             return await context.ReceiveFirstAsync<TValue>(context.LifeTime);
         }
         
-        public static async UniTask<TValue> GetAsync<TValue>(this IReadOnlyContext context, CancellationToken cancellationToken = default)
-        {
-            return await context.ReceiveFirstAsync<TValue>(cancellationToken);
-        }
-        
-        public static async UniTask<TValue> GetAsync<TValue>(
-            this IReadOnlyContext context,
-            ILifeTime lifeTime)
+        public static async UniTask<TValue> GetAsync<TValue>(this IReadOnlyContext context, ILifeTime lifeTime)
         {
             return await context.ReceiveFirstAsync<TValue>(lifeTime.Token);
+        }
+
+        public static async UniTask<TValue> GetAsync<TValue>(this IReadOnlyContext context)
+        {
+            return await context.GetAsync<TValue>(context.LifeTime.Token);
+        }
+
+        public static async UniTask<TValue> GetAsync<TValue>(this IReadOnlyContext context, CancellationToken token)
+        {
+            if (context == null) return default;
+            
+            if (context.Contains<TValue>())
+                return context.Get<TValue>();
+
+            var result = await context
+                .Receive<TValue>()
+                .FirstNotNull()
+                .FirstAsync(cancellationToken:token);
+            
+            return result;
         }
 
         public static async UniTask<TValue> ReceiveFirstAsync<TValue>(this IReadOnlyContext context, CancellationToken cancellationToken)
