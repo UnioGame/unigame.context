@@ -37,6 +37,12 @@
         public bool IsMatch(string searchString)
         {
             if (string.IsNullOrEmpty(searchString)) return true;
+#if UNITY_EDITOR
+            var asset = source.editorAsset;
+            if (asset != null)
+                if(asset.name.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+#endif
+            
             return Name.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) >= 0;
         }
     }
