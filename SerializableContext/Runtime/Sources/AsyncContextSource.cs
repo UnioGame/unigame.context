@@ -37,7 +37,7 @@
         [Space]
 #if ODIN_INSPECTOR
         [LabelText("Async Sources")]
-        [Searchable]
+        [Searchable(FilterOptions = SearchFilterOptions.ISearchFilterableInterface)]
         [ListDrawerSettings(ListElementLabelName = "Name",OnEndListElementGUI = nameof(EndDrawListElement))]
 #endif
         public List<AsyncSourceDescription> asyncSources = new();
