@@ -13,7 +13,7 @@
 #endif
     {
         public bool enabled = true;
-        public bool awaitLoading = true;
+        public bool awaitLoading = false;
         
 #if ODIN_INSPECTOR
         [DrawWithUnity]

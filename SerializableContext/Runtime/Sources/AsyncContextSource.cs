@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Threading;
     using AddressableTools.Runtime;
     using Core.Runtime;
@@ -49,23 +50,62 @@
 
         #endregion
 
+        private List<List<AsyncSourceDescription>> loadingPipeline = new();
+        private List<UniTask> loadingTasks = new();
+
         public async UniTask<IContext> RegisterAsync(IContext context)
         {
-            if (enabled == false)
-                return context;
+            if (enabled == false) return context;
 
-            var asyncValues = asyncSources
-                .Select(x => RegisterContexts(context, x));
+            loadingPipeline.Clear();
+            List<AsyncSourceDescription> activeStep = new();
+            
+            foreach (var description in asyncSources)
+            {
+                if(description.enabled == false) continue;
+                
+                if (description.awaitLoading)
+                {
+                    if (activeStep.Count > 0)
+                    {
+                        loadingPipeline.Add(activeStep);
+                        activeStep = new List<AsyncSourceDescription>();
+                        activeStep.Add(description);
+                        loadingPipeline.Add(activeStep);
+                    }
+                    else
+                    {
+                        activeStep.Add(description);
+                        loadingPipeline.Add(activeStep);
+                    }
+                    
+                    activeStep = new List<AsyncSourceDescription>();
+                }
+                else
+                {
+                    activeStep.Add(description);
+                }
+            }
+            
+            loadingPipeline.Add(activeStep);
 
-            await UniTask.WhenAll(asyncValues);
+            foreach (var step in loadingPipeline)
+                await InitializeServiceStep(context, step);
 
             return context;
         }
 
+        private async UniTask<bool> InitializeServiceStep(IContext context, List<AsyncSourceDescription> step)
+        {
+            var asyncValues = step.Select(x => RegisterContexts(context, x));
+            var result = await UniTask.WhenAll(asyncValues);
+            var success = result.All(x => x);
+            return success;
+        }
+        
         private async UniTask<bool> RegisterContexts(IContext target, AsyncSourceDescription sourceReference)
         {
-            if (sourceReference.enabled == false)
-                return true;
+            if (sourceReference.enabled == false) return true;
 
             var sourceName = name;
             var sourceValue = sourceReference.source;
@@ -78,17 +118,7 @@
 
             if (source is not IAsyncDataSource asyncSource) return false;
 
-            var isAwaitLoading = sourceReference.awaitLoading;
             var registerTask = RegisterContexts(target, asyncSource);
-
-            if (!isAwaitLoading)
-            {
-                registerTask
-                    .AttachExternalCancellation(target.LifeTime.Token)
-                    .Forget();
-
-                return true;
-            }
 
             var result = await registerTask;
             return result;
