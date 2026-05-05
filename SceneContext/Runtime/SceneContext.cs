@@ -8,7 +8,7 @@ namespace UniGame.Context.Runtime {
     using R3;
 
     [Serializable]
-    public class SceneContext : ISceneContext 
+    public class SceneContext : ISceneContext , IEquatable<SceneContext>,IEquatable<IReadOnlySceneContext>
     {
         private readonly LifeTime                   _lifeTime = new();
         private readonly EntityContext                        _context  = new();
@@ -41,16 +41,17 @@ namespace UniGame.Context.Runtime {
         public override int GetHashCode() => _sceneHandle;
 
         public bool Equals(SceneContext obj) {
-            return _sceneHandle == obj._sceneHandle;
+            return  obj!=null && _sceneHandle == obj._sceneHandle;
         }
 
         public bool Equals(IReadOnlySceneContext obj) {
-            return _handle == obj.Handle;
+            return obj!= null && _handle == obj.Handle;
         }
 
         public override bool Equals(object obj) {
-            if (obj is SceneContext handle) {
-                return handle._sceneHandle == _sceneHandle;
+            if (obj is SceneContext handle)
+            {
+                return Equals(handle);
             }
 
             return base.Equals(obj);
