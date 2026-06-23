@@ -103,22 +103,22 @@
             return success;
         }
         
-        private async UniTask<bool> RegisterContexts(IContext target, AsyncSourceDescription sourceReference)
+        private async UniTask<bool> RegisterContexts(IContext context, AsyncSourceDescription sourceReference)
         {
             if (sourceReference.enabled == false) return true;
 
             var sourceName = name;
             var sourceValue = sourceReference.source;
 
-            GameLog.Log($"GAME CONTEXT [{name}]: RegisterContexts {sourceName} {target.GetType().Name} Source name: {sourceReference.Name}");
+            GameLog.Log($"GAME CONTEXT [{name}]: RegisterContexts {sourceName} {context.GetType().Name} Source name: {sourceReference.Name}");
 
             var source = await sourceValue
-                .LoadAssetTaskAsync(target.LifeTime)
-                .ToSharedInstanceAsync(target.LifeTime);
+                .LoadAssetTaskAsync(context.LifeTime)
+                .ToSharedInstanceAsync(context.LifeTime);
 
             if (source is not IAsyncDataSource asyncSource) return false;
 
-            var registerTask = RegisterContexts(target, asyncSource);
+            var registerTask = RegisterContexts(context, asyncSource);
 
             var result = await registerTask;
             return result;
@@ -129,7 +129,7 @@
         {
             var sourceName = name;
 
-            GameLog.Log($"GAME CONTEXT [{name}]: RegisterContexts {sourceName} {target.GetType().Name} LIFETIME CONTEXT");
+            GameLog.Log($"GAME CONTEXT [{name}]: RegisterContexts {sourceName} {target.GetType().Name} LIFETIME CONTEXT",Color.yellow);
 
             var lifeTime = target.LifeTime;
             var sourceAsset = source as Object;

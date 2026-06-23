@@ -5,9 +5,12 @@ using UniGame.Core.Runtime;
 namespace UniGame.Context.Runtime
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
     using System.Threading;
     using Cysharp.Threading.Tasks;
-    
+    using UniGame.Runtime.ObjectPool;
     using UnityEngine;
     using UnityEngine.Scripting;
 
@@ -24,14 +27,8 @@ namespace UniGame.Context.Runtime
         ScriptableObject,
         IAsyncDataSource
     {
-        #region inspector
-
         public bool enabled = true;
         
-        #endregion
-
-        private SemaphoreSlim _semaphoreSlim;
-
         #region public methods
 
         public async UniTask<IContext> RegisterAsync(IContext context)
@@ -39,36 +36,82 @@ namespace UniGame.Context.Runtime
             var lifeTime = context.LifeTime;
 
             if (!enabled) return context;
+            
+            var dependencies = await GetDependencies(context);
+            var dependencyTasks = dependencies.Select(x => x.Resolve(context));
 
-#if UNITY_EDITOR || GAME_LOGS_ENABLED || DEBUG
+            var dependencyResults = await UniTask
+                .WhenAll(dependencyTasks)
+                .AttachExternalCancellation(lifeTime.Token);
+
+            var resolved = true;
+            
+            foreach (var dataResolveResult in dependencyResults)
+            {
+                if(dataResolveResult.success) continue;
+                resolved = false;
+                break;
+            }
+            
+            if (!resolved)
+            {
+                PrintResolveResult(dependencyResults);
+                return context;
+            }
+            
+#if UNITY_EDITOR || GAME_LOGS_ENABLED || GAME_DEBUG
             var profileId = ProfilerUtils.BeginWatch($"Service_{name}");
-            GameLog.Log($"Game Service Init : {name} | {DateTime.Now}");
+            GameLog.Log($"[Data Source] Init : {name} | {DateTime.Now}");
 #endif
-
+            
             await OnRegisterAsync(context)
                 .AttachExternalCancellation(lifeTime.Token);
 
-#if UNITY_EDITOR || GAME_LOGS_ENABLED || DEBUG
+#if UNITY_EDITOR || GAME_LOGS_ENABLED || GAME_DEBUG
             var watchResult = ProfilerUtils.GetWatchData(profileId);
-            GameLog.Log($"Game Source Done : {name} | Take {watchResult.watchMs} | {DateTime.Now}",
-                Color.green);
+            GameLog.Log($"[Data Source] : {name} | Take {watchResult.watchMs} | {DateTime.Now}", Color.green);
 #endif
 
             return context;
         }
-
-
+        
         public virtual void ResetSource() {}
 
         #endregion
+        
+        private void PrintResolveResult(DataResolveResult[] results)
+        {
+            var stringBuilder = ClassPool.Spawn<StringBuilder>();
+            
+            stringBuilder.AppendLine($"[Data Source] {GetType().Name} failed to resolve dependencies:");
+            var haveErrors = false;
+            
+            foreach (var dataResolveResult in results)
+            {
+                if(dataResolveResult.success) continue;
+                haveErrors = true;
+                stringBuilder.AppendLine($"\tfailed to resolve: [{dataResolveResult.message}]");
+            }
+
+            if (haveErrors)
+            {
+                Debug.LogError(stringBuilder);
+            }
+            
+            stringBuilder.Clear();
+            ClassPool.Despawn(stringBuilder);
+        }
+
+        protected virtual async UniTask<IEnumerable<IDataSourceDependency>> GetDependencies(IContext context)
+        {
+            return Enumerable.Empty<IDataSourceDependency>();
+        }
 
         protected abstract UniTask<IContext> OnRegisterAsync(IContext context);
 
         private void OnDestroy()
         {
             ResetSource();
-            _semaphoreSlim?.Dispose();
-            _semaphoreSlim = null;
         }
         
 #if ODIN_INSPECTOR
@@ -183,6 +226,65 @@ namespace UniGame.Context.Runtime
         }
     }
 
+    [Serializable]
+    public class DataSourceDependency<TData> : IDataSourceDependency
+    {
+        public int timeOutMs = 5000;
+        public int runtimeTimeoutMs = 50000;
+        
+        public async UniTask<DataResolveResult> Resolve(IContext context)
+        {
+            var lifeTime = context.LifeTime;
+            
+#if GAME_DEBUG || GAME_LOGS_ENABLED
+            var startTime = Time.realtimeSinceStartup;
+#endif
+            
+            var task = context.GetAsync<TData>();
+            var duration = 0f;
 
+            var timeout = Application.isEditor ? timeOutMs : runtimeTimeoutMs;
+            var timeoutTask = task.TimeoutWithoutException(TimeSpan.FromMilliseconds(timeout));
+            var dependency = await timeoutTask
+                .AttachExternalCancellation(lifeTime.Token);
+            
+#if GAME_DEBUG || GAME_LOGS_ENABLED
+            var finishTime = Time.realtimeSinceStartup;
+            duration = finishTime - startTime;
+#endif
+            
+            var success = !dependency.IsTimeout;
+            var message = success ? string.Empty : $"{typeof(TData).Name} was not resolved in {timeOutMs} ms";
+
+#if GAME_DEBUG || GAME_LOGS_ENABLED
+            if (!success)
+            {
+                Debug.LogError($"[Data Source] {message}");
+            }
+#endif
+            
+            var result = new DataResolveResult()
+            {
+                success = success,
+                time = duration,
+                message = message,
+            };
+
+            return result;
+        }
+    }
+    
+    public interface IDataSourceDependency
+    {
+        UniTask<DataResolveResult> Resolve(IContext context);
+    }
+
+    [Serializable]
+    public struct DataResolveResult
+    {
+        public bool success;
+        public float time;
+        public string message;
+    }
 
 }
