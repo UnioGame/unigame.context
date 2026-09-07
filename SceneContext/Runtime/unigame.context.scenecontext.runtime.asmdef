@@ -5,8 +5,7 @@
         "unigame.contextdata.runtime",
         "unigame.serializablecontext.runtime",
         "unigame.rx.runtime",
-        "unigame.unicore.runtime",
-        "UniRx"
+        "unigame.unicore.runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

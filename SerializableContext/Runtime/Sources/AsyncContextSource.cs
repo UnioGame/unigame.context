@@ -195,7 +195,7 @@
             if (sourceAsset == null) return;
 
 #if ODIN_INSPECTOR
-            if (!SirenixEditorGUI.Button("open", ButtonSizes.Medium)) return;
+            if (!GUILayout.Button("open")) return;
 #endif
             
             var type = sourceAsset.GetType();
