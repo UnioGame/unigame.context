@@ -3,6 +3,14 @@ using UniGame.Runtime.Rx;
 using UniGame.Runtime.DataFlow;
 
 namespace UniGame.Context.Runtime {
+    using UnityEngine.SceneManagement;
+
+#if UNITY_6000_3_OR_NEWER
+    using SceneId = UnityEngine.SceneManagement.SceneHandle;
+#else
+    using SceneId = System.Int32;
+#endif
+
     
     using System;
     using R3;
@@ -15,18 +23,18 @@ namespace UniGame.Context.Runtime {
         private readonly ReactiveValue<SceneStatus> _status   = new(SceneStatus.Unload);
         private readonly ReactiveValue<bool>        _isActive = new(false);
 
-        private readonly int       _sceneHandle;
+        private readonly SceneId   _sceneHandle;
         private          SceneInfo _sceneInfo;
-        private          int       _handle;
+        private          SceneId   _handle;
 
-        public SceneContext(int handle) {
+        public SceneContext(SceneId handle) {
             _sceneHandle = handle;
             UpdateSceneStatus();
         }
 
         public int BindingsCount => _context.BindingsCount;
 
-        public int Handle => _handle;
+        public SceneId Handle => _handle;
 
         public string Name => _sceneInfo.name;
 
@@ -38,7 +46,7 @@ namespace UniGame.Context.Runtime {
 
         #region base equals override
 
-        public override int GetHashCode() => _sceneHandle;
+        public override int GetHashCode() => _sceneHandle.GetHashCode();
 
         public bool Equals(SceneContext obj) {
             return  obj!=null && _sceneHandle == obj._sceneHandle;

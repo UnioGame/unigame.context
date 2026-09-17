@@ -4,6 +4,14 @@ using UniGame.Runtime.Rx;
 
 namespace UniGame.Context.Runtime
 {
+    using UnityEngine.SceneManagement;
+
+#if UNITY_6000_3_OR_NEWER
+    using SceneId = UnityEngine.SceneManagement.SceneHandle;
+#else
+    using SceneId = System.Int32;
+#endif
+
     using System;
     using System.Collections.Generic;
     using R3;
@@ -13,7 +21,7 @@ namespace UniGame.Context.Runtime
         private ReadOnlyReactiveProperty<bool> isActive;
         private IReadOnlyDictionary<Type, IValueContainerStatus> editorValues;
         private LifeTime lifeTime;
-        private int handle;
+        private SceneId handle;
         
         public DummyReadOnlySceneContext()
         {
@@ -56,7 +64,7 @@ namespace UniGame.Context.Runtime
 
         public ILifeTime LifeTime => lifeTime;
 
-        public int Handle => Int32.MaxValue;
+        public SceneId Handle => default;
 
         public string Name => string.Empty;
 

@@ -88,7 +88,7 @@ namespace UniGame.Context.Runtime
             
             while (lifeTime.IsTerminated == false)
             {
-                result = Object.FindObjectOfType<TComponent>();
+                result = Object.FindAnyObjectByType<TComponent>();
                 if (result != null)
                     break;
 

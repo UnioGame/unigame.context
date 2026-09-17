@@ -1,5 +1,11 @@
 ﻿namespace UniGame.Context.Runtime 
 {
+#if UNITY_6000_3_OR_NEWER
+    using SceneId = UnityEngine.SceneManagement.SceneHandle;
+#else
+    using SceneId = System.Int32;
+#endif
+
     using System;
     using R3;
     using UnityEditor;
@@ -34,9 +40,9 @@
 
         public static IReadOnlySceneContext GetContextFor(this Component component) => GetActiveContext(component.gameObject);
 
-        public static IReadOnlySceneContext GetContextFor(this int sceneHandle) => scenesContext.Get(sceneHandle);
+        public static IReadOnlySceneContext GetContextFor(this SceneId sceneHandle) => scenesContext.Get(sceneHandle);
 
-        public static TCurrentValue ReleaseWithScene<TCurrentValue>(this TCurrentValue CurrentValue, int handle)
+        public static TCurrentValue ReleaseWithScene<TCurrentValue>(this TCurrentValue CurrentValue, SceneId handle)
             where TCurrentValue : IDisposable 
         {
             var context = GetContextFor(handle);
@@ -94,7 +100,7 @@
             return NotifyOnSceneContext(component.gameObject);
         }
         
-        public static Observable<IReadOnlySceneContext> NotifyOnSceneContext(int handle) {
+        public static Observable<IReadOnlySceneContext> NotifyOnSceneContext(SceneId handle) {
 
             var scene  = SceneManagerUtils.GetRuntimeScene(handle);
             var filter = scenesContext.
@@ -106,7 +112,7 @@
                     Concat(filter) : filter;
         }
 
-        public static Observable<IReadOnlySceneContext> NotifyOnSceneContext(int handle,SceneStatus status) {
+        public static Observable<IReadOnlySceneContext> NotifyOnSceneContext(SceneId handle,SceneStatus status) {
             return NotifyOnSceneContext(handle).
                 Where(x => x.Status.CurrentValue == status);
         }
@@ -143,7 +149,7 @@
             return scenesContext.Receive<TCurrentValue>();
         }
         
-        public static Observable<TCurrentValue> ReceiveFromScene<TCurrentValue>(this object source,int sceneHanle) {
+        public static Observable<TCurrentValue> ReceiveFromScene<TCurrentValue>(this object source,SceneId sceneHanle) {
             var sceneThread = NotifyOnSceneContext(sceneHanle, SceneStatus.Loaded).
                 Select(x => x.Receive<TCurrentValue>()).
                 Switch();
@@ -171,7 +177,7 @@
             }
         }
         
-        public static void PublishToScene<TCurrentValue>(this object source,int handle, TCurrentValue CurrentValue) {
+        public static void PublishToScene<TCurrentValue>(this object source,SceneId handle, TCurrentValue CurrentValue) {
             var context = scenesContext.Get(handle);
             context.Publish(CurrentValue);
         }

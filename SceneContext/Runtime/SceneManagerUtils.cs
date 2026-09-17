@@ -1,10 +1,16 @@
 ﻿namespace UniGame.Context.Runtime {
+#if UNITY_6000_3_OR_NEWER
+    using SceneId = UnityEngine.SceneManagement.SceneHandle;
+#else
+    using SceneId = System.Int32;
+#endif
+
     using System.Collections.Generic;
     using UnityEngine.SceneManagement;
 
     public static class SceneManagerUtils {
 
-        public static SceneInfo GetSceneInfo(int sceneHandle) {
+        public static SceneInfo GetSceneInfo(SceneId sceneHandle) {
             
             var scene = SceneManagerUtils.GetRuntimeScene(sceneHandle);
             return GetSceneInfo(scene);
@@ -18,7 +24,7 @@
             }    
         }
         
-        public static IEnumerable<int> GetScenesHandles() {
+        public static IEnumerable<SceneId> GetScenesHandles() {
             for (int i = 0; i < SceneManager.sceneCount; i++) {
                 var scene = SceneManager.GetSceneAt(i);
                 yield return scene.handle;
@@ -59,7 +65,7 @@
             }    
         }
         
-        public static Scene GetRuntimeScene(int handle) 
+        public static Scene GetRuntimeScene(SceneId handle) 
         {
             for (int i = 0; i < SceneManager.sceneCount; i++) {
                 var scene = SceneManager.GetSceneAt(i);
