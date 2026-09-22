@@ -1,4 +1,10 @@
 ﻿namespace UniGame.Context.Runtime {
+#if UNITY_6000_3_OR_NEWER
+    using SceneId = UnityEngine.SceneManagement.SceneHandle;
+#else
+    using SceneId = System.Int32;
+#endif
+
     using System;
     using System.Collections.Generic;
     using Abstract;
@@ -18,14 +24,14 @@
 
         private readonly ISceneEventsProvider                    _eventsProvider;
         private          LifeTime                      _lifeTime;
-        private          Dictionary<int, ISceneContext>          _sceneContexts;
+        private          Dictionary<SceneId, ISceneContext>          _sceneContexts;
         private          ReactiveProperty<IReadOnlySceneContext> _activeContext;
         private          Subject<IReadOnlySceneContext>          _sceneContextChanged;
         private          EntityContext                           _context = new();
 
         public ScenesContext(ISceneEventsProvider eventsProvider) {
             _lifeTime            = new LifeTime();
-            _sceneContexts       = new Dictionary<int, ISceneContext>(8);
+            _sceneContexts       = new Dictionary<SceneId, ISceneContext>(8);
             _eventsProvider      = eventsProvider.AddTo(_lifeTime);
             _activeContext       = new ReactiveProperty<IReadOnlySceneContext>().AddTo(_lifeTime);
             _sceneContextChanged = new Subject<IReadOnlySceneContext>().AddTo(_lifeTime);
@@ -80,11 +86,11 @@
             GC.SuppressFinalize(this);
         }
 
-        public IReadOnlySceneContext Get(int sceneHandle) => Find(sceneHandle);
+        public IReadOnlySceneContext Get(SceneId sceneHandle) => Find(sceneHandle);
 
-        public void Release(int sceneHandle) => Find(sceneHandle).Release();
+        public void Release(SceneId sceneHandle) => Find(sceneHandle).Release();
         
-        public SceneStatus GetStatus(int sceneHandle) => Find(sceneHandle).Status.CurrentValue;
+        public SceneStatus GetStatus(SceneId sceneHandle) => Find(sceneHandle).Status.CurrentValue;
 
         #region private methods
 
@@ -122,13 +128,13 @@
             _eventsProvider.Activated.Subscribe(x => OnActiveSceneChanged(x.previous, x.active)).AddTo(_lifeTime);
         }
 
-        private ISceneContext Find(int sceneHandle)
+        private ISceneContext Find(SceneId sceneHandle)
         {
             return _sceneContexts.TryGetValue(sceneHandle, out var context) 
                 ? context : dummyReadOnlySceneContext;
         }
 
-        private ISceneContext UpdateSceneContext(int sceneHandle) {
+        private ISceneContext UpdateSceneContext(SceneId sceneHandle) {
             var context = Find(sceneHandle);
             context.UpdateSceneStatus();
 
@@ -153,7 +159,7 @@
 
         private void Remove(Scene scene) => Remove(scene.handle);
 
-        private void Remove(int sceneHandle) {
+        private void Remove(SceneId sceneHandle) {
             var context = Find(sceneHandle);
             UpdateSceneContext(sceneHandle);
             context.Release();
