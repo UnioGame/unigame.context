@@ -122,7 +122,8 @@
                 ? source.GetType().Namespace
                 : sourceAsset.name;
 
-            var cancellationTokenSource = new CancellationTokenSource();
+            //timeout timer is linked to the context lifetime: terminated context cancels the timer
+            var cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(lifeTime.Token);
 
 #if DEBUG
             var timer = Stopwatch.StartNew();
@@ -137,17 +138,23 @@
                     .Forget();
             }
 
-            await source.RegisterAsync(target)
-                .AttachExternalCancellation(lifeTime.Token);
+            try
+            {
+                await source.RegisterAsync(target)
+                    .AttachExternalCancellation(lifeTime.Token);
+            }
+            finally
+            {
+                //stop the timeout timer on completion, failure or context termination
+                cancellationTokenSource.Cancel();
+                cancellationTokenSource.Dispose();
+            }
 
 #if DEBUG
             var elapsed = timer.ElapsedMilliseconds;
             timer.Stop();
             GameLog.LogRuntime($"SOURCE: LOAD TIME {sourceAssetName} = {elapsed} ms");
 #endif
-
-            cancellationTokenSource.Cancel();
-            cancellationTokenSource.Dispose();
 
             GameLog.LogRuntime($"SOURCE: {sourceName} : REGISTER SOURCE {sourceAssetName}", Color.green);
 
