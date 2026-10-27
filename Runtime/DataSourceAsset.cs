@@ -169,12 +169,13 @@ namespace UniGame.Context.Runtime
 
             if (isSharedSystem)
             {
+                SemaphoreSlim semaphore;
                 lock(this)
                 {
-                    _semaphoreSlim ??= new SemaphoreSlim(1, 1);
+                    semaphore = _semaphoreSlim ??= new SemaphoreSlim(1, 1);
                 }
-                
-                await _semaphoreSlim.WaitAsync(lifeTime.Token);
+
+                await semaphore.WaitAsync(lifeTime.Token);
                 try
                 {
                     if (isSharedSystem && _sharedValue == null)
@@ -189,7 +190,14 @@ namespace UniGame.Context.Runtime
                 {
                     //When the task is ready, release the semaphore. It is vital to ALWAYS release the semaphore when we are ready, or else we will end up with a Semaphore that is forever locked.
                     //This is why it is important to do the Release within a try...finally clause; program execution may crash or take a different path, this way you are guaranteed execution
-                    _semaphoreSlim.Release();
+                    //OnDestroy can dispose and null the shared semaphore while the creation is still in flight (play mode exit)
+                    try
+                    {
+                        semaphore.Release();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                    }
                 }
                 
                 return _sharedValue;
