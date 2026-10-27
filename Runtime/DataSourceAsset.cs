@@ -60,8 +60,10 @@ namespace UniGame.Context.Runtime
             }
             
 #if UNITY_EDITOR || GAME_LOGS_ENABLED || GAME_DEBUG
-            var profileId = ProfilerUtils.BeginWatch($"Service_{name}");
-            GameLog.Log($"[Data Source] Init : {name} | {DateTime.Now}");
+            //the asset can be destroyed while the registration is awaited (play mode exit): keep the name, do not read it later
+            var sourceName = name;
+            var profileId = ProfilerUtils.BeginWatch($"Service_{sourceName}");
+            GameLog.Log($"[Data Source] Init : {sourceName} | {DateTime.Now}");
 #endif
             
             await OnRegisterAsync(context)
@@ -69,7 +71,7 @@ namespace UniGame.Context.Runtime
 
 #if UNITY_EDITOR || GAME_LOGS_ENABLED || GAME_DEBUG
             var watchResult = ProfilerUtils.GetWatchData(profileId);
-            GameLog.Log($"[Data Source] : {name} | Take {watchResult.watchMs} | {DateTime.Now}", Color.green);
+            GameLog.Log($"[Data Source] : {sourceName} | Take {watchResult.watchMs} | {DateTime.Now}", Color.green);
 #endif
 
             return context;
